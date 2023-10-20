@@ -1,13 +1,12 @@
-﻿namespace DownloadMTGCards
+﻿namespace DownloadMTGCards;
+
+internal class Program
 {
-    internal class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            var client = new ScryfallApiClient();
-            var filename = args[0];
-            var outputPath = args[1];
-            client.DownloadCards(filename, outputPath).Wait();
-        }
+        var client = new ScryfallApiClient();
+        var filename = args[0];
+        var outputPath = args[1];
+        client.DownloadCards(filename, outputPath).Wait();
     }
 }

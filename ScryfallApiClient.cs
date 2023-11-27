@@ -42,7 +42,7 @@ public class ScryfallApiClient
         Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft));
         foreach (var error in _errors)
         {
-            Console.Write(error);
+            Console.WriteLine(error);
         }
         _errors.Clear();
     }

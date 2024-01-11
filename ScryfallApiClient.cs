@@ -19,24 +19,35 @@ public class ScryfallApiClient
 
     public async Task DownloadCards(string filename, string? outputPath = null)
     {
-        var fileNameWithoutExtension = Path.ChangeExtension(filename, null);
-        var cardNames = GetCardNames(filename);
-        outputPath ??= CreateFolderForPictures(fileNameWithoutExtension);
-
-        int step = 1;
-        int count = cardNames.Count;
-        foreach (var cardName in cardNames)
+        try
         {
-            double percentage = (step / (double)count) * 100;
-            Console.Write($"\rProgress: {percentage:F2}%");
-            Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft));
-            step++;
+            var fileNameWithoutExtension = Path.ChangeExtension(filename, null);
+            var cardNames = GetCardNames(filename);
+            outputPath ??= fileNameWithoutExtension;
+            outputPath = CreateFolderForPictures(outputPath);
 
-            var imageUrl = await GetCardUrlFromScryfall(cardName);
-            if (!string.IsNullOrEmpty(imageUrl))
+            int step = 1;
+            int count = cardNames.Count;
+            foreach (var cardName in cardNames)
             {
-                await DownloadImage(imageUrl, outputPath, cardName);
+                double percentage = (step / (double)count) * 100;
+                Console.Write($"\rProgress: {percentage:F2}%");
+                Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft));
+                step++;
+
+                var images = await GetCardImageUrlsFromScryfall(cardName);
+                if (images != null)
+                {
+                    foreach (var image in images)
+                    {
+                        await DownloadImage(image.Value, outputPath, image.Key);
+                    }
+                }
             }
+        }
+        catch( Exception ex)
+        {
+            _errors.Add(ex.Message);
         }
 
         Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft));
@@ -57,7 +68,7 @@ public class ScryfallApiClient
             string? line;
             while ((line = reader.ReadLine()) != null)
             {
-                lines.Add(line);
+                lines.Add(RemoveFirstNumberAndSpace(line));
             }
         }
         catch (Exception e)
@@ -65,10 +76,33 @@ public class ScryfallApiClient
             _errors.Add($"Card: {filename} Error: {e.Message}");
         }
 
+        var skippingLines = new List<string>
+        {
+            "Mainboard", "Maybeboard", "Sideboard"
+        };
+        lines = lines
+            .Where(l => !skippingLines.Contains(l) && !string.IsNullOrWhiteSpace(l))
+            .ToList();
+
         return lines;
     }
 
-    private async Task<string?> GetCardUrlFromScryfall(string cardName)
+    private static string RemoveFirstNumberAndSpace(string input)
+    {
+        // Find the index of the first space
+        int spaceIndex = input.IndexOf(' ');
+
+        // If space exists, remove the characters before it
+        if (spaceIndex != -1)
+        {
+            return input.Substring(spaceIndex + 1);
+        }
+
+        // If no space, return the input as is
+        return input;
+    }
+
+    private async Task<Dictionary<string, string>?> GetCardImageUrlsFromScryfall(string cardName)
     {
         string requestUrl = "/cards/search?q=" + cardName;
 
@@ -77,12 +111,26 @@ public class ScryfallApiClient
         if (response.IsSuccessStatusCode)
         {
             var json = await response.Content.ReadAsStringAsync();
-
             var jsonObject = JObject.Parse(json);
-            // TODO work with dual side cards as well
-            var imageUrl = jsonObject?["data"]?[0]?["image_uris"]?["large"]?.Value<string>();
+            Dictionary<string, string> imagesUrl = new();
 
-            return imageUrl;
+            // Handle two dual side cards as well
+            if (jsonObject?["data"]?[0]?["card_faces"] is not null)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    var sideName = jsonObject?["data"]?[0]?["card_faces"]?[i]?["name"]?.Value<string>()!;
+                    var imageUrl = jsonObject?["data"]?[0]?["card_faces"]?[i]?["image_uris"]?["large"]?.Value<string>()!;
+                    imagesUrl.Add(sideName, imageUrl);
+                }
+            }
+            // Single page card
+            else
+            {
+                imagesUrl.Add(cardName, jsonObject?["data"]?[0]?["image_uris"]?["large"]?.Value<string>()!);
+            }
+
+            return imagesUrl;
         }
         else if (response.StatusCode == HttpStatusCode.NotFound)
         {

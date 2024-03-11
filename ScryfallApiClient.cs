@@ -78,7 +78,8 @@ public class ScryfallApiClient
 
         var skippingLines = new List<string>
         {
-            "Mainboard", "Maybeboard", "Sideboard"
+            "Mainboard", "Maybeboard", "Sideboard", "Commander", "Card",
+            "Artifact", "Creature", "Battle", "Planeswalker", "Enchantment", "Land", "Instant", "Sorcery"
         };
         lines = lines
             .Where(l => !skippingLines.Contains(l) && !string.IsNullOrWhiteSpace(l))

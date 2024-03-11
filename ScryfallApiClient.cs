@@ -145,7 +145,7 @@ public class ScryfallApiClient
             // Single page card
             else
             {
-                imagesUrl.Add(cardName, jsonObject?["data"]?[0]?["image_uris"]?["large"]?.Value<string>()!);
+                imagesUrl.Add(cardName, jsonObject?["data"]?[i]?["image_uris"]?["large"]?.Value<string>()!);
             }
 
             return imagesUrl;

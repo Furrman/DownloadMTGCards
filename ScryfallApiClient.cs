@@ -114,14 +114,31 @@ public class ScryfallApiClient
             var json = await response.Content.ReadAsStringAsync();
             var jsonObject = JObject.Parse(json);
             Dictionary<string, string> imagesUrl = new();
+            if (jsonObject?["data"] is null || jsonObject?["data"]?.Count() == 0)
+            {
+                _errors.Add($"Card: {cardName} not found");
+                return null;
+            }
+
+            var index = 0;
+            for (int i = 0; i < jsonObject?["data"]!.Count(); i++)
+            {
+                var foundCard = jsonObject?["data"]!;
+                var foundCardName = foundCard[i]?["name"]?.ToString() ?? string.Empty;
+                if (foundCardName.Equals(cardName, StringComparison.OrdinalIgnoreCase))
+                {
+                    index = i;
+                    break;
+                }
+            }
 
             // Handle two dual side cards as well
-            if (jsonObject?["data"]?[0]?["card_faces"] is not null)
+            if (jsonObject?["data"]?[index]?["card_faces"] is not null)
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    var sideName = jsonObject?["data"]?[0]?["card_faces"]?[i]?["name"]?.Value<string>()!;
-                    var imageUrl = jsonObject?["data"]?[0]?["card_faces"]?[i]?["image_uris"]?["large"]?.Value<string>()!;
+                    var sideName = jsonObject?["data"]?[index]?["card_faces"]?[i]?["name"]?.Value<string>()!;
+                    var imageUrl = jsonObject?["data"]?[index]?["card_faces"]?[i]?["image_uris"]?["large"]?.Value<string>()!;
                     imagesUrl.Add(sideName, imageUrl);
                 }
             }

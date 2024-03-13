@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DownloadMTGCards": {
+      "commandName": "Project",
+      "commandLineArgs": "\"Karador Dredge Reanimator.txt\" Karador"
+    }
+  }
+}

@@ -8,9 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="OfficeIMO.Word" Version="0.13.0" />
-    <PackageReference Include="System.Drawing.Common" Version="8.0.2" />
+    <Content Remove="C:\Users\Hubert.Furmanek\.nuget\packages\officeimo.word\0.13.0\contentFiles\any\net7.0\OfficeIMO.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Library\Library.csproj" />
   </ItemGroup>
 	
 </Project>

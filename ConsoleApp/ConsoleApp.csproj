@@ -14,5 +14,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Library\Library.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Karador Dredge Reanimator.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 	
 </Project>

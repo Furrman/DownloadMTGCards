@@ -26,15 +26,13 @@ public class ScryfallApiClient
             outputPath ??= fileNameWithoutExtension;
             outputPath = CreateFolderForPictures(outputPath);
 
-            int step = 1;
+            int step = 0;
             int count = cardNames.Count;
+            Console.Write($"\rDownload progress: {0:F2}%");
+            ConsoleExtensions.ClearLastLine();
+
             foreach (var cardName in cardNames)
             {
-                double percentage = (step / (double)count) * 100;
-                Console.Write($"\rProgress: {percentage:F2}%");
-                Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft));
-                step++;
-
                 var images = await GetCardImageUrlsFromScryfall(cardName);
                 if (images != null)
                 {
@@ -43,14 +41,25 @@ public class ScryfallApiClient
                         await DownloadImage(image.Value, outputPath, image.Key);
                     }
                 }
+
+                double percentage = (step / (double)count) * 100;
+                Console.Write($"\rDownload progress: {percentage:F2}%");
+                ConsoleExtensions.ClearLastLine();
+                step++;
             }
+
+            Console.Write($"\rDownload progress: {100:F2}%");
+            Console.Write($"\rDownload completed!");
         }
-        catch( Exception ex)
+        catch(Exception ex)
         {
             _errors.Add(ex.Message);
         }
 
-        Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft));
+        if (_errors.Count > 0)
+        {
+            Console.WriteLine("Errors:");
+        }
         foreach (var error in _errors)
         {
             Console.WriteLine(error);
@@ -124,7 +133,7 @@ public class ScryfallApiClient
             for (int i = 0; i < jsonObject?["data"]!.Count(); i++)
             {
                 var foundCard = jsonObject?["data"]!;
-                var foundCardName = foundCard[i]?["name"]?.ToString() ?? string.Empty;
+                var foundCardName = foundCard[index]?["name"]?.ToString() ?? string.Empty;
                 if (foundCardName.Equals(cardName, StringComparison.OrdinalIgnoreCase))
                 {
                     index = i;
@@ -143,8 +152,9 @@ public class ScryfallApiClient
                 }
             }
             // Single page card
-            else
+            if (imagesUrl.Count == 0 || imagesUrl.Any(i => i.Value is null))
             {
+                imagesUrl.Clear();
                 imagesUrl.Add(cardName, jsonObject?["data"]?[index]?["image_uris"]?["large"]?.Value<string>()!);
             }
 
@@ -169,12 +179,12 @@ public class ScryfallApiClient
         {
             byte[] imageBytes = await client.GetByteArrayAsync(imageUrl);
 
-            var filePath = Path.Combine(folderPath, $"{filename}.jpg");
+            var filePath = Path.Combine(folderPath, $"{filename.Replace(" // ", "-")}.jpg");
             File.WriteAllBytes(filePath, imageBytes);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _errors.Add($"Card: {filename} Error: {e.Message}");
+            _errors.Add($"Card: {filename} Error: {ex.Message}");
         }
     }
 

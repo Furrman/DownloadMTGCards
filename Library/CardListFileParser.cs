@@ -1,4 +1,7 @@
-﻿namespace Library;
+﻿using Library.Clients;
+using Microsoft.Extensions.Logging;
+
+namespace Library;
 
 public class CardListFileParser
 {
@@ -7,6 +10,12 @@ public class CardListFileParser
         "Mainboard", "Maybeboard", "Sideboard", "Commander", "Card",
         "Artifact", "Creature", "Battle", "Planeswalker", "Enchantment", "Land", "Instant", "Sorcery"
     };
+    private readonly ILogger<CardListFileParser> _logger;
+
+    public CardListFileParser(ILogger<CardListFileParser> logger)
+    {
+        _logger = logger;
+    }
 
     public Dictionary<string, int> GetCardList(string filename)
     {

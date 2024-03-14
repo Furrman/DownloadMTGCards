@@ -1,10 +1,18 @@
 ﻿using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.Extensions.Logging;
 using OfficeIMO.Word;
 
 namespace Library
 {
     public class PrintableCardsWordGenerator
     {
+        private readonly ILogger<PrintableCardsWordGenerator> _logger;
+
+        public PrintableCardsWordGenerator(ILogger<PrintableCardsWordGenerator> logger)
+        {
+            _logger = logger;
+        }
+
         public void GenerateWord(string imageFolderPath, string? wordOutputDirectory, string? filename = null)
         {
             try

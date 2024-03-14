@@ -1,19 +1,22 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using System.Net;
 
 namespace Library.Clients;
 
 public class ScryfallApiClient
 {
-    private readonly HttpClient _httpClient;
     private readonly string _baseUrl = "https://api.scryfall.com";
+    private readonly HttpClient _httpClient;
+    private readonly ILogger<ScryfallApiClient> _logger;
 
-    public ScryfallApiClient()
+    public ScryfallApiClient(ILogger<ScryfallApiClient> logger)
     {
         _httpClient = new HttpClient
         {
             BaseAddress = new Uri(_baseUrl)
         };
+        _logger = logger;
     }
 
     public async Task DownloadCards(Dictionary<string, int> cards, string? outputPath = null)

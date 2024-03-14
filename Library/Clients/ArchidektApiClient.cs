@@ -1,35 +1,37 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
+﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using OfficeIMO.Word;
 using System.Text.RegularExpressions;
 
 namespace Library.Clients;
 
 public class ArchidektApiClient
 {
-    private readonly HttpClient _httpClient;
     private readonly string _baseUrl = "https://archidekt.com/";
+    private readonly HttpClient _httpClient;
+    private readonly ILogger<ArchidektApiClient> _logger;
 
-    public ArchidektApiClient()
+    public ArchidektApiClient(ILogger<ArchidektApiClient> logger)
     {
         _httpClient = new HttpClient
         {
             BaseAddress = new Uri(_baseUrl)
         };
+        _logger = logger;
     }
 
     public async Task<Dictionary<string, int>> GetCardList(int deckId)
     {
         var cardList = new Dictionary<string, int>();
 
-        var requestUrl = $"/api/decks/{deckId}/";
+        var requestUrl = $"/api/deck/{deckId}/";
         HttpResponseMessage response;
         try
         {
             response = await _httpClient.GetAsync(requestUrl);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "DeckId: {deckId} Error in getting card list from the deck", deckId);
             return cardList;
         }
 
@@ -41,8 +43,9 @@ public class ArchidektApiClient
                 var json = await response.Content.ReadAsStringAsync();
                 jsonObject = JObject.Parse(json);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "DeckId: {deckId} Error in parsing card list from the deck", deckId);
                 return cardList;
             }
 
@@ -74,6 +77,7 @@ public class ArchidektApiClient
         }
         else
         {
+            _logger.LogWarning("DeckId: {deckId} Failure response from getting card list from the deck", deckId);
         }
 
         return cardList;
@@ -89,8 +93,9 @@ public class ArchidektApiClient
         {
             response = await _httpClient.GetAsync(requestUrl);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "DeckId: {deckId} Error in getting deck name", deckId);
             return deckName;
         }
 
@@ -102,8 +107,9 @@ public class ArchidektApiClient
                 var json = await response.Content.ReadAsStringAsync();
                 jsonObject = JObject.Parse(json);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "DeckId: {deckId} Error in parsing response with deck name", deckId);
                 return deckName;
             }
 
@@ -111,6 +117,7 @@ public class ArchidektApiClient
         }
         else
         {
+            _logger.LogWarning("DeckId: {deckId} Failure response from getting deck name {statusCode} {reasonPhrase}", deckId, response.StatusCode, response.ReasonPhrase);
         }
 
         return deckName;

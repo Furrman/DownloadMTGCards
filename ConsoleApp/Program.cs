@@ -48,10 +48,14 @@ internal class Program
             outputDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), filename);
         }
 
+        Console.WriteLine("Downloading images...");
         var scryFallClient = new ScryfallApiClient();
         scryFallClient.DownloadCards(cardList, outputDirectoryPath).Wait();
+        Console.WriteLine("Download completed!");
 
+        Console.WriteLine("Creating word document...");
         var wordGenerator = new PrintableCardsWordGenerator();
         wordGenerator.GenerateWord(outputDirectoryPath, outputDirectoryPath, filename: filename);
+        Console.WriteLine("Creation completed!");
     }
 }

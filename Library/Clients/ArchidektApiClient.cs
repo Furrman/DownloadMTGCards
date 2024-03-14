@@ -2,7 +2,6 @@
 using Newtonsoft.Json.Linq;
 using OfficeIMO.Word;
 using System.Text.RegularExpressions;
-using static System.Net.WebRequestMethods;
 
 namespace Library.Clients;
 

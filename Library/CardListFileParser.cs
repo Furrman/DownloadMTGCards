@@ -39,8 +39,9 @@ public class CardListFileParser
                 cardList.Add(cardEntries.Value.Item1, cardEntries.Value.Item2);
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error in parsing card list from file");
         }
 
         return cardList;

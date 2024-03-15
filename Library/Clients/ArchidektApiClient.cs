@@ -77,7 +77,7 @@ public class ArchidektApiClient
         }
         else
         {
-            _logger.LogWarning("DeckId: {deckId} Failure response from getting card list from the deck", deckId);
+            _logger.LogWarning("DeckId: {deckId} Failure response from getting card list from the deck Request: {statusCode} {reasonPhrase}", deckId, response.StatusCode, response.ReasonPhrase);
         }
 
         return cardList;
@@ -117,7 +117,7 @@ public class ArchidektApiClient
         }
         else
         {
-            _logger.LogWarning("DeckId: {deckId} Failure response from getting deck name {statusCode} {reasonPhrase}", deckId, response.StatusCode, response.ReasonPhrase);
+            _logger.LogWarning("DeckId: {deckId} Failure response from getting deck name Request: {statusCode} {reasonPhrase}", deckId, response.StatusCode, response.ReasonPhrase);
         }
 
         return deckName;

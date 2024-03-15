@@ -45,8 +45,9 @@ namespace Library
 
                 SaveWord(document);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in writting images to Word file");
             }
         }
 
@@ -70,8 +71,9 @@ namespace Library
                     paragraph.AddImage(imagePath, width: widthPixels, height: heightPixels);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in adding image to word file");
             }
         }
         
@@ -97,8 +99,9 @@ namespace Library
             {
                 document.Save();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in saving Word file");
             }
         }
     }

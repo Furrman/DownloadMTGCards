@@ -39,8 +39,9 @@ public class ScryfallApiClient
                 }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogCritical(ex, "Error in downloading cards from the Scryfall");
         }
     }
 
@@ -93,11 +94,13 @@ public class ScryfallApiClient
         }
         else if (response.StatusCode == HttpStatusCode.NotFound)
         {
+            _logger.LogWarning("CardName: {cardName} Card not found", cardName);
             return null;
         }
         else
         {
-            throw new HttpRequestException($"Request failed with status code: {response.StatusCode}");
+            _logger.LogError("CardName: {cardName} Request failed Request: {statusCode} {reasonPhrase}", cardName, response.StatusCode, response.ReasonPhrase);
+            return null;
         }
     }
 
@@ -111,8 +114,9 @@ public class ScryfallApiClient
             var filePath = Path.Combine(folderPath, $"{quantity}_{filename.Replace(" // ", "-")}.jpg");
             await File.WriteAllBytesAsync(filePath, imageBytes);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error in downloading image from the Scryfall");
         }
     }
 
@@ -120,7 +124,7 @@ public class ScryfallApiClient
     {
         if (directoryName == null)
         {
-            return Path.Combine(Directory.GetCurrentDirectory(), "ArchidektPrinter_output");
+            return Path.Combine(Directory.GetCurrentDirectory(), Constants.DEFAULT_FOLDER_NAME);
         }
 
         if (!Directory.Exists(directoryName))

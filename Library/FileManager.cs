@@ -6,7 +6,7 @@ public class FileManager
     {
         if (path == null)
         {
-            return Path.Combine(Directory.GetCurrentDirectory(), Constants.DEFAULT_FOLDER_NAME);
+            path = Path.Combine(Directory.GetCurrentDirectory(), Constants.DEFAULT_FOLDER_NAME);
         }
 
         if (!Directory.Exists(path))
@@ -28,9 +28,9 @@ public class FileManager
         {
             return path;
         }
-        
-        return Path.Combine(Directory.GetCurrentDirectory(), 
-            Constants.DEFAULT_FOLDER_NAME, 
-            deckName ?? Constants.DEFAULT_WORD_FILE_NAME);
+
+        return Path.Combine(Directory.GetCurrentDirectory(),
+            Constants.DEFAULT_FOLDER_NAME,
+            deckName != null ? $"{deckName}.docx" : Constants.DEFAULT_WORD_FILE_NAME);
     }
 }

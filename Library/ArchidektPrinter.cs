@@ -24,10 +24,10 @@ public class ArchidektPrinter
         )
     {
         _logger = logger;
+        _archidektApiClient = archidektApiClient;
         _scryfallApiClient = scryfallApiClient;
         _wordGenerator = wordGenerator;
         _fileParser = fileParser;
-        _archidektApiClient = archidektApiClient;
         _fileManager = fileManager;
     }
 

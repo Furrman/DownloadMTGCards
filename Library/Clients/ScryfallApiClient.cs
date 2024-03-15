@@ -117,19 +117,4 @@ public class ScryfallApiClient
             _logger.LogError(ex, "Error in downloading image from the Scryfall");
         }
     }
-
-    private string CreateFolderForPictures(string? directoryName)
-    {
-        if (directoryName == null)
-        {
-            return Path.Combine(Directory.GetCurrentDirectory(), Constants.DEFAULT_FOLDER_NAME);
-        }
-
-        if (!Directory.Exists(directoryName))
-        {
-            Directory.CreateDirectory(directoryName);
-        }
-
-        return Path.GetFullPath(directoryName);
-    }
 }

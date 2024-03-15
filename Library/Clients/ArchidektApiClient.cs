@@ -23,7 +23,7 @@ public class ArchidektApiClient
     {
         var cardList = new Dictionary<string, MagicCardEntry>();
 
-        var requestUrl = $"/api/deck/{deckId}/";
+        var requestUrl = $"/api/decks/{deckId}/";
         HttpResponseMessage response;
         try
         {

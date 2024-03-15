@@ -77,15 +77,14 @@ public class ArchidektPrinter
         await GenerateWord(cardList, wordFilePath);
     }
 
-    public async Task GenerateWordFromSavedImages(string imageFolderPath, string? wordFilePath)
+    public void GenerateWordFromSavedImages(string imageFolderPath, string? wordFilePath)
     {
         if (!_fileManager.DirectoryExists(imageFolderPath))
         {
             throw new ArgumentException("ImageFolderPath has to be correct path to folder with card images");
         }
-        // TODO Check output word file path
-
         wordFilePath = _fileManager.ReturnCorrectFilePath(wordFilePath);
+        
         _wordGenerator.GenerateWord(imageFolderPath, wordFilePath!);
     }
 

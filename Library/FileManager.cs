@@ -1,6 +1,6 @@
 ﻿namespace Library;
 
-internal class FileManager
+public class FileManager
 {
     public string CreateOutputFolder(string? path)
     {

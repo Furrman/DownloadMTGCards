@@ -14,13 +14,14 @@ public class ArchidektPrinter
     private readonly WordGenerator _wordGenerator;
     private readonly FileManager _fileManager;
 
-    internal ArchidektPrinter(
+    public ArchidektPrinter(
         ILogger<ArchidektPrinter> logger,
         ArchidektApiClient archidektApiClient,
         ScryfallApiClient scryfallApiClient,
         CardListFileParser fileParser,
         WordGenerator wordGenerator,
-        FileManager fileManager)
+        FileManager fileManager
+        )
     {
         _logger = logger;
         _scryfallApiClient = scryfallApiClient;

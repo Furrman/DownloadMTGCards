@@ -1,13 +1,15 @@
 ﻿using Library.Clients;
-using Library.Models;
+using Library.Models.DTO;
+using Library.Models.Events;
 using Microsoft.Extensions.Logging;
-using OfficeIMO.Word;
 using System.Text.RegularExpressions;
 
 namespace Library;
 
 public class ArchidektPrinter
 {
+    public event EventHandler<GenerateWordProgressEventArgs>? ProgressUpdate;
+
     private readonly ILogger<ArchidektPrinter> _logger;
     private readonly ArchidektApiClient _archidektApiClient;
     private readonly ScryfallApiClient _scryfallApiClient;
@@ -120,12 +122,17 @@ public class ArchidektPrinter
     }
 
 
-    private async Task GenerateWord(Dictionary<string, MagicCardEntry> cardList, string? wordFilePath, string? deckName = null)
+    private async Task GenerateWord(Dictionary<string, CardEntryDTO> cardList, string? wordFilePath, string? deckName = null)
     {
         wordFilePath = _fileManager.ReturnCorrectFilePath(wordFilePath, deckName);
         _fileManager.CreateOutputFolder(Path.GetDirectoryName(wordFilePath));
 
         await _scryfallApiClient.UpdateCardImageLinks(cardList);
+
+        double step = 0.0; 
+        double count = cardList.SelectMany(c => c.Value.ImageUrls).Count();
+        double progress = 0.0;
+        UpdateProgress(progress);
 
         await _wordGenerator.GenerateWord(wordFilePath, async (doc) =>
         {
@@ -137,27 +144,46 @@ public class ArchidektPrinter
                     var imageContent = await _scryfallApiClient.GetImage(entry.Value);
                     if (imageContent == null)
                     {
+                        step = UpdateStep(step, count, progress);
                         continue;
                     }
                     _wordGenerator.AddImageToWord(paragraph, entry.Key, imageContent, card.Value.Quantity);
+                    step = UpdateStep(step, count, progress);
                 }
             }
         });
     }
 
-    private async Task SaveImages(Dictionary<string, MagicCardEntry> cardList, string? outputPath)
+    private async Task SaveImages(Dictionary<string, CardEntryDTO> cardList, string? outputPath)
     {
         outputPath = _fileManager.CreateOutputFolder(outputPath);
 
         await _scryfallApiClient.DownloadCards(cardList, outputPath!);
     }
 
-    private async Task SaveImagesAndGenerateWord(Dictionary<string, MagicCardEntry> cardList, string? imageOutputPath, string? wordFilePath, string? deckName = null)
+    private async Task SaveImagesAndGenerateWord(Dictionary<string, CardEntryDTO> cardList, string? imageOutputPath, string? wordFilePath, string? deckName = null)
     {
         imageOutputPath = _fileManager.CreateOutputFolder(imageOutputPath);
         wordFilePath = _fileManager.ReturnCorrectFilePath(wordFilePath, deckName);
 
         await _scryfallApiClient.DownloadCards(cardList, imageOutputPath!);
         _wordGenerator.GenerateWord(imageOutputPath!, wordFilePath!);
+    }
+
+    private void UpdateProgress(double? percent = null, string? errorMessage = null)
+    {
+        ProgressUpdate?.Invoke(this, new GenerateWordProgressEventArgs
+        {
+            ErrorMessage = errorMessage,
+            Percent = percent
+        });
+    }
+
+    private double UpdateStep(double step, double count, double progress)
+    {
+        step++;
+        progress = step / count * 100;
+        UpdateProgress(progress);
+        return step;
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace Library.Models;
+﻿namespace Library.Models.DTO;
 
-public class MagicCardEntry
+public class CardEntryDTO
 {
     public int Quantity { get; set; }
     public string Name { get; set; } = string.Empty;

@@ -1,4 +1,4 @@
-﻿using Library.Models;
+﻿using Library.Models.DTO;
 using Microsoft.Extensions.Logging;
 
 namespace Library;
@@ -17,9 +17,9 @@ public class CardListFileParser
         _logger = logger;
     }
 
-    public Dictionary<string, MagicCardEntry> GetCardList(string filename)
+    public Dictionary<string, CardEntryDTO> GetCardList(string filename)
     {
-        var cardList = new Dictionary<string, MagicCardEntry>();
+        var cardList = new Dictionary<string, CardEntryDTO>();
 
         try
         {
@@ -36,7 +36,7 @@ public class CardListFileParser
                 {
                     continue;
                 }
-                cardList.Add(cardData.Value.Item1, new MagicCardEntry
+                cardList.Add(cardData.Value.Item1, new CardEntryDTO
                 {
                     Name = cardData.Value.Item1,
                     Quantity = cardData.Value.Item2

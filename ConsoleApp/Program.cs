@@ -41,9 +41,25 @@ internal class Program
         var outputDirectoryPath = args.Length > 1 ? args[1] : null;
         var wordFilePath = args.Length > 2 ? args[2] : null;
 
+        archidektPrinter.ProgressUpdate += UpdateProgress;
+
         // Version with storing images and word
         //archidektPrinter.SaveImagesAndGenerateWord(deckId, inputFilePath, outputDirectoryPath, wordFilePath).Wait();
         // Version with saving just a word
         archidektPrinter.GenerateWord(deckId, outputDirectoryPath, wordFilePath).Wait();
+    }
+
+    private static void UpdateProgress(object? sender, Library.Models.Events.GenerateWordProgressEventArgs e)
+    {
+        if (e.Percent is not null)
+        {
+            Console.WriteLine($"{e.Percent:F1}%");
+        }
+        if (e.ErrorMessage is not null)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(e.ErrorMessage);
+            Console.ResetColor();
+        }
     }
 }

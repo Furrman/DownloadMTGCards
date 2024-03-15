@@ -1,4 +1,4 @@
-﻿using Library.Models;
+﻿using Library.Models.DTO;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
@@ -19,9 +19,9 @@ public class ArchidektApiClient
         _logger = logger;
     }
 
-    public async Task<Dictionary<string, MagicCardEntry>> GetCardList(int deckId)
+    public async Task<Dictionary<string, CardEntryDTO>> GetCardList(int deckId)
     {
-        var cardList = new Dictionary<string, MagicCardEntry>();
+        var cardList = new Dictionary<string, CardEntryDTO>();
 
         var requestUrl = $"/api/decks/{deckId}/";
         HttpResponseMessage response;
@@ -73,7 +73,7 @@ public class ArchidektApiClient
                 }
                 else
                 {
-                    cardList.Add(cardName, new MagicCardEntry
+                    cardList.Add(cardName, new CardEntryDTO
                     {
                         Name = cardName,
                         Quantity = cardQuantity

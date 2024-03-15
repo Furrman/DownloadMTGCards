@@ -1,4 +1,4 @@
-﻿using Library.Models;
+﻿using Library.Models.DTO;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System.Net;
@@ -23,7 +23,7 @@ public class ScryfallApiClient
     }
 
 
-    public async Task UpdateCardImageLinks(Dictionary<string, MagicCardEntry> cards)
+    public async Task UpdateCardImageLinks(Dictionary<string, CardEntryDTO> cards)
     {
         try
         {
@@ -56,7 +56,7 @@ public class ScryfallApiClient
         }
     }
 
-    public async Task DownloadCards(Dictionary<string, MagicCardEntry> cards, string outputPath)
+    public async Task DownloadCards(Dictionary<string, CardEntryDTO> cards, string outputPath)
     {
         try
         {

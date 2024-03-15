@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Library.Models;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using System.Text.RegularExpressions;
 
 namespace Library.Clients;
 
@@ -19,9 +19,9 @@ public class ArchidektApiClient
         _logger = logger;
     }
 
-    public async Task<Dictionary<string, int>> GetCardList(int deckId)
+    public async Task<Dictionary<string, MagicCardEntry>> GetCardList(int deckId)
     {
-        var cardList = new Dictionary<string, int>();
+        var cardList = new Dictionary<string, MagicCardEntry>();
 
         var requestUrl = $"/api/deck/{deckId}/";
         HttpResponseMessage response;
@@ -67,11 +67,17 @@ public class ArchidektApiClient
                     continue;
                 }
 
-                if (!cardList.TryAdd(cardName, cardQuantity))
+                if (cardList.ContainsKey(cardName))
                 {
-                    var value = cardList.GetValueOrDefault(cardName);
-                    value++;
-                    cardList[cardName] = value;
+                    cardList[cardName].Quantity++;
+                }
+                else
+                {
+                    cardList.Add(cardName, new MagicCardEntry
+                    {
+                        Name = cardName,
+                        Quantity = cardQuantity
+                    });
                 }
             }
         }
@@ -121,26 +127,5 @@ public class ArchidektApiClient
         }
 
         return deckName;
-    }
-
-    public bool TryExtractDeckIdFromUrl(string url, out int deckId)
-    {
-        deckId = 0;
-        string pattern = @"^https:\/\/archidekt\.com\/(?:api\/decks\/(\d+)\/|decks\/(\d+)\/)";
-        Regex regex = new(pattern);
-
-        Match match = regex.Match(url);
-        if (match.Success)
-        {
-            for (int i = 1; i < match.Groups.Count; i++)
-            {
-                if (int.TryParse(match.Groups[i].Value, out deckId))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 }

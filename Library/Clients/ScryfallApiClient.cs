@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Library.Models;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System.Net;
 
@@ -19,22 +20,19 @@ public class ScryfallApiClient
         _logger = logger;
     }
 
-    public async Task DownloadCards(Dictionary<string, int> cards, string? outputPath = null)
+    public async Task DownloadCards(Dictionary<string, MagicCardEntry> cards, string outputPath)
     {
         try
         {
-            outputPath = CreateFolderForPictures(outputPath);
-
             foreach (var card in cards)
             {
-                var cardName = card.Key;
-                var cardQuantity = card.Value;
-                var images = await GetCardImageUrlsFromScryfall(cardName);
+                var cardData = card.Value;
+                var images = await GetCardImageUrlsFromScryfall(cardData.Name);
                 if (images != null)
                 {
                     foreach (var image in images)
                     {
-                        await DownloadImage(image.Value, outputPath, image.Key, cardQuantity);
+                        await DownloadImage(image.Value, outputPath, cardData.Name, cardData.Quantity);
                     }
                 }
             }

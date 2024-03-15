@@ -1,4 +1,4 @@
-﻿using Library.Clients;
+﻿using Library.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Library;
@@ -17,9 +17,9 @@ public class CardListFileParser
         _logger = logger;
     }
 
-    public Dictionary<string, int> GetCardList(string filename)
+    public Dictionary<string, MagicCardEntry> GetCardList(string filename)
     {
-        var cardList = new Dictionary<string, int>();
+        var cardList = new Dictionary<string, MagicCardEntry>();
 
         try
         {
@@ -31,12 +31,16 @@ public class CardListFileParser
                 {
                     continue;
                 }
-                var cardEntries = ParseLine(line);
-                if (cardEntries == null)
+                var cardData = ParseLine(line);
+                if (cardData == null)
                 {
                     continue;
                 }
-                cardList.Add(cardEntries.Value.Item1, cardEntries.Value.Item2);
+                cardList.Add(cardData.Value.Item1, new MagicCardEntry
+                {
+                    Name = cardData.Value.Item1,
+                    Quantity = cardData.Value.Item2
+                });
             }
         }
         catch (Exception ex)

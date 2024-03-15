@@ -4,31 +4,19 @@ using OfficeIMO.Word;
 
 namespace Library
 {
-    public class PrintableCardsWordGenerator
+    public class WordGenerator
     {
-        private readonly ILogger<PrintableCardsWordGenerator> _logger;
+        private readonly ILogger<WordGenerator> _logger;
 
-        public PrintableCardsWordGenerator(ILogger<PrintableCardsWordGenerator> logger)
+        public WordGenerator(ILogger<WordGenerator> logger)
         {
             _logger = logger;
         }
 
-        public void GenerateWord(string imageFolderPath, string? wordOutputDirectory, string? filename = null)
+        public void GenerateWord(string imageFolderPath, string wordFilePath)
         {
             try
             {
-                filename ??= $"{Constants.DEFAULT_FOLDER_NAME}.docx";
-                if (!Path.HasExtension(filename))
-                {
-                    filename = $"{filename}.docx";
-                }
-                wordOutputDirectory ??= Path.Combine(Directory.GetCurrentDirectory(), filename);
-                var wordFilePath = Path.Combine(wordOutputDirectory, filename);
-                if (!Path.Exists(wordOutputDirectory)) 
-                { 
-                    Directory.CreateDirectory(wordFilePath);
-                }
-
                 using WordDocument document = WordDocument.Create(wordFilePath);
 
                 document.Margins.Type = WordMargin.Narrow;

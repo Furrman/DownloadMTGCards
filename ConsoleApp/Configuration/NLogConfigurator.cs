@@ -8,9 +8,10 @@ namespace ConsoleApp.Configuration;
 
 internal static class NLogConfigurator
 {
-    public static ILoggerFactory SetupNLog()
+    public static IServiceCollection SetupNLog(this IServiceCollection serviceCollection)
     {
-        var serviceProvider = new ServiceCollection()
+        LogManager.Configuration = new XmlLoggingConfiguration("nlog.config");
+        return serviceCollection
             .AddLogging(builder =>
             {
                 builder.ClearProviders();
@@ -20,10 +21,6 @@ internal static class NLogConfigurator
                     CaptureMessageProperties = true,
                     CaptureMessageTemplates = true
                 });
-            })
-            .BuildServiceProvider();
-        LogManager.Configuration = new XmlLoggingConfiguration("nlog.config");
-        var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-        return loggerFactory;
+            });
     }
 }

@@ -13,6 +13,30 @@ public class WordGenerator
         _logger = logger;
     }
 
+
+    public async Task GenerateWord(string wordFilePath, Func<WordDocument, Task>? customAction = null)
+    {
+        try
+        {
+            using WordDocument document = WordDocument.Create(wordFilePath);
+
+            document.Margins.Type = WordMargin.Narrow;
+            document.PageSettings.Orientation = PageOrientationValues.Landscape;
+            document.PageSettings.PageSize = WordPageSize.A4;
+
+            if (customAction != null)
+            {
+                await customAction!.Invoke(document);
+            }
+
+            document.Save();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in writting images to Word file");
+        }
+    }
+
     public void GenerateWord(string imageFolderPath, string wordFilePath)
     {
         try
@@ -31,7 +55,7 @@ public class WordGenerator
                 AddImageToWord(paragraph, imagePath);
             }
 
-            SaveWord(document);
+            document.Save();
         }
         catch (Exception ex)
         {
@@ -39,24 +63,30 @@ public class WordGenerator
         }
     }
 
+    public void AddImageToWord(WordParagraph paragraph, string imageName, byte[] imageContent, int quantity)
+    {
+        try
+        {
+            using MemoryStream stream = new(imageContent);
+            paragraph.AddImage(stream, imageName, width: Constants.CARD_WIDTH_PIXELS, height: Constants.CARD_HEIGHT_PIXELS);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in adding image to word file");
+        }
+    }
+
+
     private void AddImageToWord(WordParagraph paragraph, string imagePath)
     {
         try
         {
-            double targetHeight = 88.0;
-            double targetWidth = 63.0;
-            int dpi = 96;
-
-            double pixelsPerMillimeter = dpi / 25.4;
-            double heightPixels = targetHeight * pixelsPerMillimeter;
-            double widthPixels = targetWidth * pixelsPerMillimeter;
-
             var cardFile = Path.GetFileNameWithoutExtension(imagePath);
             ExtractPattern(cardFile, out int cardQuantity, out string cardName);
 
             for (int i = 0; i < cardQuantity; i++)
             {
-                paragraph.AddImage(imagePath, width: widthPixels, height: heightPixels);
+                paragraph.AddImage(imagePath, width: Constants.CARD_WIDTH_PIXELS, height: Constants.CARD_HEIGHT_PIXELS);
             }
         }
         catch (Exception ex)
@@ -78,18 +108,6 @@ public class WordGenerator
             {
                 stringValue = input.Substring(underscoreIndex + 1);
             }
-        }
-    }
-
-    private void SaveWord(WordDocument document)
-    {
-        try
-        {
-            document.Save();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error in saving Word file");
         }
     }
 }

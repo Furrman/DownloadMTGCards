@@ -10,6 +10,7 @@ public class ScryfallApiClient
     private readonly string _baseUrl = "https://api.scryfall.com";
     private readonly HttpClient _httpClient;
     private readonly ILogger<ScryfallApiClient> _logger;
+    private readonly HttpClient _imageDownloadClient;
 
     public ScryfallApiClient(ILogger<ScryfallApiClient> logger)
     {
@@ -17,7 +18,42 @@ public class ScryfallApiClient
         {
             BaseAddress = new Uri(_baseUrl)
         };
+        _imageDownloadClient = new HttpClient();
         _logger = logger;
+    }
+
+
+    public async Task UpdateCardImageLinks(Dictionary<string, MagicCardEntry> cards)
+    {
+        try
+        {
+            foreach (var card in cards)
+            {
+                var cardData = card.Value;
+                var images = await GetCardImageUrlsFromScryfall(cardData.Name);
+                if (images != null)
+                {
+                    cardData.ImageUrls = images;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "Error in downloading cards from the Scryfall");
+        }
+    }
+
+    public async Task<byte[]?> GetImage(string imageUrl)
+    {
+        try
+        {
+            return await _imageDownloadClient.GetByteArrayAsync(imageUrl);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in downloading image from the Scryfall");
+            return null;
+        }
     }
 
     public async Task DownloadCards(Dictionary<string, MagicCardEntry> cards, string outputPath)
@@ -104,10 +140,9 @@ public class ScryfallApiClient
 
     private async Task DownloadImage(string imageUrl, string folderPath, string filename, int quantity)
     {
-        using var client = new HttpClient();
         try
         {
-            byte[] imageBytes = await client.GetByteArrayAsync(imageUrl);
+            byte[] imageBytes = await _imageDownloadClient.GetByteArrayAsync(imageUrl);
 
             var filePath = Path.Combine(folderPath, $"{quantity}_{filename.Replace(" // ", "-")}.jpg");
             await File.WriteAllBytesAsync(filePath, imageBytes);

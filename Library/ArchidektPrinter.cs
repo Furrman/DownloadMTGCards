@@ -1,6 +1,7 @@
 ﻿using Library.Clients;
 using Library.Models;
 using Microsoft.Extensions.Logging;
+using OfficeIMO.Word;
 using System.Text.RegularExpressions;
 
 namespace Library;
@@ -30,6 +31,7 @@ public class ArchidektPrinter
         _fileParser = fileParser;
         _fileManager = fileManager;
     }
+
 
     public async Task SaveImages(int deckId, string? outputPath)
     {
@@ -62,7 +64,7 @@ public class ArchidektPrinter
     {
         if (deckId != 0) await SaveImagesAndGenerateWord(deckId, outputPath, wordFilePath);
         else if (deckListFilePath != null) await SaveImagesAndGenerateWord(deckListFilePath, outputPath, wordFilePath);
-        else throw new ArgumentException("DeckId has to be bigger than 0 or DeckListFilePath has to be specified");
+        else throw new ArgumentException("DeckId has to be bigger than 0 or DeckListFilePath has to be correcet");
     }
 
     public async Task GenerateWord(int deckId, string? wordFilePath)
@@ -76,6 +78,13 @@ public class ArchidektPrinter
     {
         var cardList = _fileParser.GetCardList(deckListFilePath);
         await GenerateWord(cardList, wordFilePath);
+    }
+
+    public async Task GenerateWord(int deckId, string? deckListFilePath, string? wordFilePath)
+    {
+        if (deckId != 0) await GenerateWord(deckId, wordFilePath);
+        else if (deckListFilePath != null) await GenerateWord(deckListFilePath, wordFilePath);
+        else throw new ArgumentException("DeckId has to be bigger than 0 or WordFilePath has to be correcet");
     }
 
     public void GenerateWordFromSavedImages(string imageFolderPath, string? wordFilePath)
@@ -114,8 +123,26 @@ public class ArchidektPrinter
     private async Task GenerateWord(Dictionary<string, MagicCardEntry> cardList, string? wordFilePath, string? deckName = null)
     {
         wordFilePath = _fileManager.ReturnCorrectFilePath(wordFilePath, deckName);
+        _fileManager.CreateOutputFolder(Path.GetDirectoryName(wordFilePath));
 
-        // TODO Save word at the same time of loading images from Scryfall API
+        await _scryfallApiClient.UpdateCardImageLinks(cardList);
+
+        await _wordGenerator.GenerateWord(wordFilePath, async (doc) =>
+        {
+            var paragraph = doc.AddParagraph();
+            foreach (var card in cardList)
+            {
+                foreach (var entry in card.Value.ImageUrls)
+                {
+                    var imageContent = await _scryfallApiClient.GetImage(entry.Value);
+                    if (imageContent == null)
+                    {
+                        continue;
+                    }
+                    _wordGenerator.AddImageToWord(paragraph, entry.Key, imageContent, card.Value.Quantity);
+                }
+            }
+        });
     }
 
     private async Task SaveImages(Dictionary<string, MagicCardEntry> cardList, string? outputPath)

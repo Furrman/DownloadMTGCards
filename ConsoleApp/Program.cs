@@ -1,7 +1,6 @@
 ﻿using Library;
 using Microsoft.Extensions.DependencyInjection;
 using ConsoleApp.Configuration;
-using System.Text.RegularExpressions;
 
 namespace ConsoleApp;
 
@@ -42,6 +41,9 @@ internal class Program
         var outputDirectoryPath = args.Length > 1 ? args[1] : null;
         var wordFilePath = args.Length > 2 ? args[2] : null;
 
-        archidektPrinter.SaveImagesAndGenerateWord(deckId, inputFilePath, outputDirectoryPath, wordFilePath).Wait();
+        // Version with storing images and word
+        //archidektPrinter.SaveImagesAndGenerateWord(deckId, inputFilePath, outputDirectoryPath, wordFilePath).Wait();
+        // Version with saving just a word
+        archidektPrinter.GenerateWord(deckId, outputDirectoryPath, wordFilePath).Wait();
     }
 }

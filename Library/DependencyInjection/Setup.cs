@@ -13,6 +13,7 @@ public static class Setup
             .AddScoped<ScryfallApiClient>()
             .AddScoped<CardListFileParser>()
             .AddScoped<WordGenerator>()
+            .AddScoped<FileManager>()
         ;
     }
 }
